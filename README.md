@@ -8,9 +8,17 @@ A stunning, modern QR code generator with premium design aesthetics. Create cust
 
 - **🎨 Premium Design**: Modern dark theme with glassmorphism and smooth animations
 - **🔧 Full Customization**: Adjust size, colors, and more
-- **📥 Multiple Export Formats**: Download as PNG or SVG
-- **⚡ Real-time Generation**: Instant QR code creation
-- **📱 Responsive**: Works on all devices
+- **📥 Multiple Export Formats**: Download as PNG or SVG with optimized vectorization
+- **⚡ Real-time Generation**: Instant QR code creation with loading indicators
+- **📱 Progressive Web App (PWA)**: Install on any device, works offline
+- **📋 Copy to Clipboard**: One-click copy for easy sharing
+- **🔗 Share API**: Native sharing on mobile devices
+- **⌨️ Keyboard Shortcuts**: Power user features (Ctrl+Enter, Ctrl+S, etc.)
+- **🎯 Quick Presets**: Built-in templates for URL, WiFi, Email, vCard, SMS
+- **✅ Input Validation**: Smart validation for URLs, WiFi configs, and more
+- **🔒 Security**: SRI hashes, CSP headers, offline-first architecture
+- **♿ Accessible**: ARIA labels, keyboard navigation, screen reader support
+- **📊 Character Counter**: Real-time feedback on input length
 - **🚀 No Dependencies**: Pure JavaScript (except QRCode.js library)
 
 ## 🚀 Quick Start
@@ -89,28 +97,49 @@ Modern browsers implement security restrictions on `file://` URLs that prevent p
 
 ## 🎯 How to Use
 
-1. **Enter Content**: Type or paste any text, URL, WiFi credentials, email, or other data
-2. **Customize**: 
+1. **Quick Start with Presets**: Click any preset button (URL, WiFi, Email, vCard, SMS) to load a template
+2. **Enter Content**: Type or paste any text, URL, WiFi credentials, email, or other data
+3. **Customize**: 
    - Adjust the QR code size using the slider (128px - 512px)
    - Choose custom colors for dark and light areas
-3. **Generate**: Click the "Generate QR Code" button
-4. **Download**: Choose PNG or SVG format to download your QR code
+   - Watch the character counter to stay within limits
+4. **Generate**: Click "Generate QR Code" or press **Ctrl+Enter**
+5. **Export**: 
+   - **Download PNG**: Press **Ctrl+S** or click the button
+   - **Download SVG**: Click for scalable vector format
+   - **Copy**: Press **Ctrl+C** or click to copy to clipboard
+   - **Share**: Use native share on mobile devices
+
+### ⌨️ Keyboard Shortcuts
+
+- **Ctrl+Enter**: Generate QR code
+- **Ctrl+S**: Download as PNG
+- **Ctrl+C**: Copy to clipboard (when QR code is visible)
+- **Esc**: Clear input and reset
 
 ## 🎨 Customization Examples
 
+Use the preset buttons for instant templates, or create your own:
+
 ### URL QR Code
 ```
-https://github.com
+https://github.com/pinnet/QRgen
 ```
 
 ### WiFi QR Code
 ```
-WIFI:T:WPA;S:MyNetwork;P:MyPassword;;
+WIFI:T:WPA;S:MyNetworkName;P:MyPassword123;;
 ```
+*Format*: `WIFI:T:[WPA/WEP];S:[SSID];P:[Password];;`
 
 ### Email QR Code
 ```
-mailto:hello@example.com
+mailto:hello@example.com?subject=Hello&body=Hi%20there
+```
+
+### SMS QR Code
+```
+smsto:+1234567890:Hello! Check out this QR code.
 ```
 
 ### vCard (Contact) QR Code
@@ -118,9 +147,22 @@ mailto:hello@example.com
 BEGIN:VCARD
 VERSION:3.0
 FN:John Doe
-TEL:+1234567890
+ORG:Company Name
+TITLE:Developer
+TEL:+1-234-567-8900
 EMAIL:john@example.com
+URL:https://example.com
 END:VCARD
+```
+
+### Phone Number
+```
+tel:+1234567890
+```
+
+### Geographic Location
+```
+geo:37.7749,-122.4194
 ```
 
 ## 🐳 Docker Deployment
@@ -206,22 +248,27 @@ docker-compose logs -f qrgen
 
 ```
 QRgen/
-├── index.html          # Main HTML structure
+├── index.html          # Main HTML structure with PWA support
 ├── index.css           # Styles and design system
-├── app.js             # QR code generation logic
-├── qrcode.min.js      # QRCode.js library
+├── app.js             # QR code generation logic with validation
+├── qrcode.min.js      # QRCode.js library (local copy)
+├── manifest.json      # PWA manifest for installation
+├── service-worker.js  # Service worker for offline capability
 ├── Dockerfile         # Docker container configuration
 ├── docker-compose.yml # Docker Compose orchestration
 ├── .dockerignore      # Docker build exclusions
+├── DOCKER_GUIDE.md    # Docker deployment guide
 └── README.md          # This file
 ```
 
 ## 🛠️ Technology Stack
 
-- **HTML5**: Semantic structure with accessibility features
+- **HTML5**: Semantic structure with accessibility features and PWA support
 - **CSS3**: Modern design with custom properties, glassmorphism, and animations
-- **JavaScript (ES6+)**: Class-based architecture with clean code practices
-- **QRCode.js**: External library for QR code generation (CDN)
+- **JavaScript (ES6+)**: Class-based architecture with async/await, validation, and error handling
+- **QRCode.js**: Local library with CDN fallback and SRI hash for security
+- **Service Workers**: Offline-first PWA with caching strategy
+- **Web APIs**: Clipboard API, Share API, Canvas API for modern features
 
 ## 🎨 Design Features
 
@@ -245,7 +292,11 @@ QRgen/
 - **100% Client-Side**: All QR code generation happens in your browser
 - **No Data Collection**: We don't collect, store, or transmit your data
 - **No Analytics**: No tracking or cookies
-- **Offline Capable**: Works without internet (after initial load)
+- **Offline Capable**: Full PWA support - works without internet after installation
+- **SRI Integrity**: Subresource Integrity hashes protect against CDN tampering
+- **Security Headers**: X-Frame-Options, CSP, and other protective headers
+- **Input Validation**: Comprehensive validation prevents injection attacks
+- **Local Library**: Primary use of local files reduces external dependencies
 
 ## 🐛 Troubleshooting
 
@@ -253,14 +304,32 @@ QRgen/
 Make sure you're running the app through a local HTTP server, not opening the HTML file directly.
 
 ### QR Code Not Generating?
-1. Ensure you've entered some content
-2. Check the browser console (F12) for errors
-3. Try refreshing the page
+1. Ensure you've entered some content (use presets to test)
+2. Check the character counter - stay under 4,296 characters
+3. Check the browser console (F12) for errors
+4. Verify colors have sufficient contrast
+5. Try refreshing the page
+
+### Copy to Clipboard Not Working?
+- Requires HTTPS or localhost
+- Check browser permissions for clipboard access
+- Fallback: Right-click the QR code to save manually
 
 ### Colors Not Updating?
 The color pickers sync with text inputs. You can use either:
 - The color picker tool
 - Or type hex codes directly (e.g., `#FF5733`)
+
+### PWA Installation Issues?
+- Requires HTTPS (or localhost for testing)
+- Check manifest.json is accessible
+- Look for install prompt in browser address bar
+- Try Chrome's "Install app" option in menu
+
+### Keyboard Shortcuts Not Working?
+- Ensure you're not in an input field (except Ctrl+Enter)
+- Some shortcuts may conflict with browser/OS shortcuts
+- Try clicking outside input fields first
 
 ## 📄 License
 

@@ -14,14 +14,22 @@
   
   <title>QR Gen - Beautiful QR Code Generator</title>
   
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#8845ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="QR Gen">
+  
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%238845ff' rx='48'/><path fill='white' d='M48 48h24v24H48zm0 32h24v24H48zm32-32h24v24H80zm0 32h24v24H80zm32-32h24v24h-24zm0 32h24v24h-24zM48 120h24v24H48zm32 0h24v24H80zm32 0h24v24h-24z'/></svg>">
   
   <!-- Styles -->
   <link rel="stylesheet" href="index.css">
   
-  <!-- QR Code Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- QR Code Library - Local with CDN fallback -->
+  <script src="qrcode.min.js" onerror="this.onerror=null; this.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'; this.integrity='sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=='; this.crossOrigin='anonymous';"></script>
 </head>
 <body>
   <!-- Decorative particles -->
@@ -42,17 +50,45 @@
       <section class="glass-card">
         <h2 class="card-title">🎨 Customize Your QR Code</h2>
         
+        <!-- Quick Presets -->
+        <div class="presets-section">
+          <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;">✨ QUICK PRESETS</label>
+          <div class="preset-buttons">
+            <button type="button" class="preset-btn" data-preset="url" title="Insert example URL">
+              🔗 URL
+            </button>
+            <button type="button" class="preset-btn" data-preset="wifi" title="Insert WiFi format">
+              📶 WiFi
+            </button>
+            <button type="button" class="preset-btn" data-preset="email" title="Insert email format">
+              ✉️ Email
+            </button>
+            <button type="button" class="preset-btn" data-preset="vcard" title="Insert vCard format">
+              👤 vCard
+            </button>
+            <button type="button" class="preset-btn" data-preset="sms" title="Insert SMS format">
+              💬 SMS
+            </button>
+          </div>
+        </div>
+        
         <form id="qr-form">
           <!-- Text Input -->
           <div class="form-group">
-            <label for="qr-text">Content *</label>
+            <label for="qr-text">Content * <span style="font-size: 0.75rem; font-weight: normal; color: var(--text-tertiary)">(max 4,296 chars)</span></label>
             <textarea 
               id="qr-text" 
               class="input-field" 
               placeholder="Enter URL, text, or any data you want to encode..."
               required
+              maxlength="4296"
               aria-label="QR code content"
+              aria-describedby="content-hint"
             ></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
+              <small id="content-hint" style="font-size: 0.75rem; color: var(--text-tertiary);">Supports URLs, text, WiFi credentials, vCards, and more</small>
+              <small id="char-counter" style="font-size: 0.75rem; color: var(--text-tertiary);">0 / 4,296</small>
+            </div>
           </div>
           
           <!-- Size Control -->
@@ -68,6 +104,7 @@
               value="256" 
               step="32"
               aria-label="QR code size"
+              title="Adjust QR code size from 128px to 512px"
             >
           </div>
           
@@ -116,8 +153,18 @@
           
           <!-- Generate Button -->
           <button type="submit" class="btn btn-full" id="generate-btn">
-            <span>🎯 Generate QR Code</span>
+            <span class="btn-content">
+              <span class="btn-icon">🎯</span>
+              <span class="btn-text">Generate QR Code</span>
+            </span>
+            <span class="btn-loader" style="display: none;">
+              <span class="spinner"></span>
+              <span>Generating...</span>
+            </span>
           </button>
+          <div class="keyboard-hint" style="text-align: center; margin-top: 0.5rem;">
+            <small style="color: var(--text-tertiary); font-size: 0.75rem;">⌨️ Press <kbd>Ctrl+Enter</kbd> to generate</small>
+          </div>
         </form>
       </section>
       
@@ -137,11 +184,17 @@
           
           <!-- Download Buttons -->
           <div class="download-buttons" id="download-section" style="display: none;">
-            <button class="btn" id="download-png">
+            <button class="btn" id="download-png" title="Download as PNG (Ctrl+S)">
               <span>⬇️ Download PNG</span>
             </button>
-            <button class="btn btn-secondary" id="download-svg">
+            <button class="btn btn-secondary" id="download-svg" title="Download as SVG">
               <span>⬇️ Download SVG</span>
+            </button>
+            <button class="btn btn-secondary" id="copy-btn" title="Copy to clipboard">
+              <span>📋 Copy</span>
+            </button>
+            <button class="btn btn-secondary" id="share-btn" title="Share QR code" style="display: none;">
+              <span>📤 Share</span>
             </button>
           </div>
         </div>
@@ -151,10 +204,42 @@
     <!-- Footer -->
     <footer class="footer">
       <p>Built with ❤️ using modern web technologies | <a href="https://github.com" target="_blank" rel="noopener">View on GitHub</a></p>
+      <p style="margin-top: 0.5rem; font-size: 0.75rem;">
+        <kbd>Ctrl+Enter</kbd> Generate · <kbd>Ctrl+S</kbd> Download · <kbd>Ctrl+C</kbd> Copy · <kbd>Esc</kbd> Clear
+      </p>
     </footer>
   </div>
   
   <!-- JavaScript -->
   <script src="app.js"></script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((registration) => {
+            console.log('✅ ServiceWorker registered:', registration.scope);
+            
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New service worker available
+                  if (confirm('New version available! Reload to update?')) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          })
+          .catch((error) => {
+            console.log('❌ ServiceWorker registration failed:', error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
