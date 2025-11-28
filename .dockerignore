@@ -1,0 +1,10 @@
+# QR Code Generator - Docker
+
+# Add node_modules and other unnecessary files
+node_modules/
+npm-debug.log
+.git/
+.gitignore
+README.md
+.DS_Store
+*.md

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create stunning QR codes instantly with our free, customizable QR code generator. Design unique QR codes with custom colors and sizes for your business or personal use.">
+  <meta name="keywords" content="QR code generator, custom QR codes, free QR generator, QR code maker">
+  <meta name="author" content="QR Gen">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="QR Gen - Beautiful QR Code Generator">
+  <meta property="og:description" content="Create stunning, customizable QR codes instantly and for free.">
+  
+  <title>QR Gen - Beautiful QR Code Generator</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="index.css">
+  
+  <!-- QR Code Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <!-- Decorative particles -->
+  <div class="particle" style="width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s;"></div>
+  <div class="particle" style="width: 60px; height: 60px; top: 70%; left: 80%; animation-delay: 5s;"></div>
+  <div class="particle" style="width: 80px; height: 80px; top: 40%; left: 5%; animation-delay: 10s;"></div>
+  
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>✨ QR Gen</h1>
+      <p>Create beautiful, custom QR codes in seconds</p>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Input Section -->
+      <section class="glass-card">
+        <h2 class="card-title">🎨 Customize Your QR Code</h2>
+        
+        <form id="qr-form">
+          <!-- Text Input -->
+          <div class="form-group">
+            <label for="qr-text">Content *</label>
+            <textarea 
+              id="qr-text" 
+              class="input-field" 
+              placeholder="Enter URL, text, or any data you want to encode..."
+              required
+              aria-label="QR code content"
+            ></textarea>
+          </div>
+          
+          <!-- Size Control -->
+          <div class="form-group">
+            <label for="qr-size">
+              Size: <span class="slider-value" id="size-value">256</span>px
+            </label>
+            <input 
+              type="range" 
+              id="qr-size" 
+              min="128" 
+              max="512" 
+              value="256" 
+              step="32"
+              aria-label="QR code size"
+            >
+          </div>
+          
+          <!-- Color Customization -->
+          <div class="color-picker-group">
+            <div class="form-group">
+              <label for="qr-dark">Dark Color</label>
+              <div class="color-input-wrapper">
+                <input 
+                  type="color" 
+                  id="qr-dark" 
+                  value="#000000"
+                  aria-label="QR code dark color"
+                >
+                <input 
+                  type="text" 
+                  class="input-field" 
+                  id="qr-dark-text" 
+                  value="#000000"
+                  pattern="^#[0-9A-Fa-f]{6}$"
+                  aria-label="QR code dark color hex value"
+                >
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="qr-light">Light Color</label>
+              <div class="color-input-wrapper">
+                <input 
+                  type="color" 
+                  id="qr-light" 
+                  value="#ffffff"
+                  aria-label="QR code light color"
+                >
+                <input 
+                  type="text" 
+                  class="input-field" 
+                  id="qr-light-text" 
+                  value="#ffffff"
+                  pattern="^#[0-9A-Fa-f]{6}$"
+                  aria-label="QR code light color hex value"
+                >
+              </div>
+            </div>
+          </div>
+          
+          <!-- Generate Button -->
+          <button type="submit" class="btn btn-full" id="generate-btn">
+            <span>🎯 Generate QR Code</span>
+          </button>
+        </form>
+      </section>
+      
+      <!-- Output Section -->
+      <section class="glass-card">
+        <h2 class="card-title">🖼️ Your QR Code</h2>
+        
+        <div class="qr-display">
+          <div id="qr-container">
+            <div class="empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+              </svg>
+              <p>Your QR code will appear here</p>
+            </div>
+          </div>
+          
+          <!-- Download Buttons -->
+          <div class="download-buttons" id="download-section" style="display: none;">
+            <button class="btn" id="download-png">
+              <span>⬇️ Download PNG</span>
+            </button>
+            <button class="btn btn-secondary" id="download-svg">
+              <span>⬇️ Download SVG</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Built with ❤️ using modern web technologies | <a href="https://github.com" target="_blank" rel="noopener">View on GitHub</a></p>
+    </footer>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>

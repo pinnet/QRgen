@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  qrgen:
+    build: .
+    container_name: qr-code-generator
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    labels:
+      - "com.qrgen.description=QR Code Generator Web Application"
