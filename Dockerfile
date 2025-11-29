@@ -22,6 +22,8 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy application files
 COPY package*.json ./
 COPY server.js ./
+COPY db.js ./
+COPY init-db.sql ./
 
 # Create public directory and copy static files
 RUN mkdir -p public/icons
