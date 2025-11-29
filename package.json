@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "NODE_ENV=development nodemon server.js",
-    "test": "echo \"No tests yet\" && exit 0"
+    "test": "node test-url-shortening.js",
+    "test:local": "TEST_URL=http://localhost:8080 node test-url-shortening.js",
+    "test:prod": "TEST_URL=https://jmplnk.uk node test-url-shortening.js"
   },
   "keywords": [
     "qr-code",
