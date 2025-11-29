@@ -73,6 +73,11 @@ app.get('/shorten', (req, res) => {
   res.sendFile(path.join(__dirname, staticDir, 'shorten.html'));
 });
 
+// Serve login page
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, staticDir, 'login.html'));
+});
+
 // Serve stats page (we'll create a simple stats viewer)
 app.get('/stats/:shortCode', async (req, res) => {
   const { shortCode } = req.params;
