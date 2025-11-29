@@ -1,7 +1,13 @@
 # QR Code Generator - Docker
 
 # Add node_modules and other unnecessary files
+# Deployment script
+deploy.ps1
+deploy.tar
+
+# Node modules - will be installed in container
 node_modules/
+npm-debug.log*
 npm-debug.log
 .git/
 .gitignore

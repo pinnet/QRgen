@@ -23,14 +23,31 @@ A stunning, modern QR code generator with premium design aesthetics. Create cust
 
 ## 🚀 Quick Start
 
-### Option 1: Using Docker (Recommended for Production)
+### Option 1: Using Node.js (Recommended)
+
+```bash
+# Install dependencies
+npm install
+
+# Start the server
+npm start
+
+# Open http://localhost:8080 in your browser
+```
+
+**Development mode with auto-reload:**
+```bash
+npm run dev
+```
+
+### Option 2: Using Docker (Recommended for Production)
 
 ```bash
 # Build the Docker image
 docker build -t qr-code-generator .
 
 # Run the container
-docker run -d -p 8080:80 --name qrgen qr-code-generator
+docker run -d -p 8080:8080 --name qrgen qr-code-generator
 
 # Open http://localhost:8080 in your browser
 ```
@@ -48,7 +65,7 @@ docker-compose down
 docker-compose logs -f
 ```
 
-### Option 2: Using Python
+### Option 3: Using Python
 
 ```bash
 # Navigate to the project directory
@@ -56,18 +73,6 @@ cd QRgen
 
 # Start a local HTTP server
 python -m http.server 8080
-
-# Open http://localhost:8080 in your browser
-```
-
-### Option 3: Using Node.js
-
-```bash
-# Install http-server globally (if not already installed)
-npm install -g http-server
-
-# Start the server
-http-server -p 8080
 
 # Open http://localhost:8080 in your browser
 ```
@@ -248,27 +253,38 @@ docker-compose logs -f qrgen
 
 ```
 QRgen/
-├── index.html          # Main HTML structure with PWA support
-├── index.css           # Styles and design system
-├── app.js             # QR code generation logic with validation
-├── qrcode.min.js      # QRCode.js library (local copy)
-├── manifest.json      # PWA manifest for installation
-├── service-worker.js  # Service worker for offline capability
-├── Dockerfile         # Docker container configuration
+├── server.js          # Node.js Express server
+├── package.json       # Node.js dependencies and scripts
+├── index.html         # Main HTML structure with PWA support
+├── index.css          # Styles and design system
+├── app.js            # QR code generation logic with validation
+├── qrcode.min.js     # QRCode.js library (local copy)
+├── manifest.json     # PWA manifest for installation
+├── service-worker.js # Service worker for offline capability
+├── Dockerfile        # Docker container configuration (Node.js)
 ├── docker-compose.yml # Docker Compose orchestration
-├── .dockerignore      # Docker build exclusions
-├── DOCKER_GUIDE.md    # Docker deployment guide
-└── README.md          # This file
+├── .dockerignore     # Docker build exclusions
+├── deploy.ps1        # PowerShell deployment script
+├── DOCKER_GUIDE.md   # Docker deployment guide
+└── README.md         # This file
 ```
 
 ## 🛠️ Technology Stack
 
+### Frontend
 - **HTML5**: Semantic structure with accessibility features and PWA support
 - **CSS3**: Modern design with custom properties, glassmorphism, and animations
 - **JavaScript (ES6+)**: Class-based architecture with async/await, validation, and error handling
 - **QRCode.js**: Local library with CDN fallback and SRI hash for security
 - **Service Workers**: Offline-first PWA with caching strategy
 - **Web APIs**: Clipboard API, Share API, Canvas API for modern features
+
+### Backend
+- **Node.js**: Lightweight Express server for production deployment
+- **Express**: Fast, minimalist web framework
+- **Helmet**: Security headers and CSP configuration
+- **Compression**: Gzip compression for optimized delivery
+- **Docker**: Multi-stage builds for minimal container size
 
 ## 🎨 Design Features
 

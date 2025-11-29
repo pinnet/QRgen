@@ -594,7 +594,7 @@ class QRCodeGenerator {
     return Math.max(1, Math.floor(size / 33)); // Most QR codes are ~21-33 modules
   }
 
-  showNotification(message, type = 'info') {
+  async copyToClipboard() {
     if (!this.currentCanvas) {
       this.showNotification('Please generate a QR code first', 'error');
       return;

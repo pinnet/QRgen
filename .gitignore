@@ -2,8 +2,9 @@
 deploy.ps1
 deploy.tar
 
-# Node modules (if any)
+# Node modules
 node_modules/
+package-lock.json
 
 # IDE
 .vscode/
