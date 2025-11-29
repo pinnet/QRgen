@@ -329,16 +329,332 @@
   color: white;
 }
 
-.api-token {
+/* API Access Section */
+.api-section {
+  margin-bottom: 2rem;
+}
+
+.api-section h3 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.api-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.api-header {
+  margin-bottom: 1.5rem;
+}
+
+.api-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.api-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.api-title h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+}
+
+.api-description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.token-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
   background: rgba(0, 0, 0, 0.3);
-  padding: 0.5rem;
-  border-radius: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(136, 69, 255, 0.2);
+}
+
+.api-token-full {
+  flex: 1;
   font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: var(--primary);
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.api-status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.status-label {
   font-size: 0.75rem;
   color: var(--text-secondary);
-  max-width: 400px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.status-active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.status-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+}
+
+/* API Documentation */
+.api-docs {
+  margin-top: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.docs-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+.docs-card h4 {
+  margin-top: 0;
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+}
+
+.endpoint-group {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.endpoint-group:last-of-type {
+  border-bottom: none;
+}
+
+.endpoint-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.method {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.method-get {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.method-post {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.endpoint-url {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: var(--primary);
+}
+
+.endpoint-desc {
+  color: var(--text-secondary);
+  margin: 0.5rem 0 1rem 0;
+}
+
+.code-block {
+  margin: 1rem 0;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 1rem;
+}
+
+.code-block code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #e5e7eb;
+  line-height: 1.6;
+}
+
+.response-example {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(136, 69, 255, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+}
+
+.response-example strong {
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.response-example pre {
+  margin: 0;
+}
+
+.response-example code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.api-notes {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 152, 0, 0.1);
+  border-radius: 12px;
+  border-left: 4px solid #ff9800;
+}
+
+.api-notes h5 {
+  margin-top: 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.api-notes ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.api-notes li {
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.api-notes code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--primary);
+}
+
+.api-examples {
+  margin-top: 2rem;
+}
+
+.api-examples h5 {
+  margin-top: 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.example-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.example-content {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.example-content pre {
+  margin: 0;
+  padding: 1.5rem;
+}
+
+.example-content code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #e5e7eb;
+  line-height: 1.6;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive */
@@ -381,7 +697,25 @@
     gap: 0.5rem;
   }
 
-  .api-token {
-    max-width: 200px;
+  .token-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .api-status {
+    grid-template-columns: 1fr;
+  }
+
+  .example-tabs {
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    white-space: nowrap;
+  }
+
+  .code-block,
+  .example-content {
+    font-size: 0.75rem;
   }
 }

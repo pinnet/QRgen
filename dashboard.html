@@ -142,12 +142,250 @@
             <span class="account-label">Member Since:</span>
             <span class="account-value" id="member-since"></span>
           </div>
-          <div class="account-row">
-            <span class="account-label">API Access:</span>
-            <span class="account-value">
-              <code class="api-token" id="api-token">Loading...</code>
-              <button class="btn btn-sm btn-secondary" id="copy-token-btn">📋 Copy</button>
-            </span>
+        </div>
+      </section>
+
+      <!-- API Access Section -->
+      <section class="api-section">
+        <div class="section-header">
+          <h3>🔑 API Access</h3>
+          <button class="btn btn-sm btn-secondary" id="toggle-api-docs">📖 View Documentation</button>
+        </div>
+        
+        <div class="api-card">
+          <div class="api-header">
+            <div class="api-title">
+              <span class="api-icon">🎯</span>
+              <div>
+                <h4>Your Authentication Token</h4>
+                <p class="api-description">Use this token to authenticate API requests. Keep it secure and never share it publicly.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="token-container">
+            <code class="api-token-full" id="api-token-full">Loading...</code>
+            <button class="btn btn-primary btn-sm" id="copy-token-btn">
+              <span id="copy-token-text">📋 Copy Token</span>
+            </button>
+          </div>
+
+          <div class="api-status">
+            <div class="status-item">
+              <span class="status-label">Status:</span>
+              <span class="status-badge status-active">✓ Active</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Expires:</span>
+              <span class="status-value" id="token-expiry">7 days from login</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Rate Limit:</span>
+              <span class="status-value">1000 requests/hour</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Documentation -->
+        <div class="api-docs" id="api-docs" style="display: none;">
+          <div class="docs-card">
+            <h4>📚 API Endpoints</h4>
+            
+            <div class="endpoint-group">
+              <div class="endpoint-header">
+                <span class="method method-post">POST</span>
+                <code class="endpoint-url">/api/shorten</code>
+              </div>
+              <p class="endpoint-desc">Create a shortened URL</p>
+              <div class="code-block">
+                <pre><code>curl -X POST https://jmplnk.uk/api/shorten \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/very/long/url",
+    "shortCode": "mylink"
+  }'</code></pre>
+              </div>
+              <div class="response-example">
+                <strong>Response:</strong>
+                <pre><code>{
+  "success": true,
+  "short_code": "mylink",
+  "url": "https://jmplnk.uk/mylink"
+}</code></pre>
+              </div>
+            </div>
+
+            <div class="endpoint-group">
+              <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <code class="endpoint-url">/api/user/stats</code>
+              </div>
+              <p class="endpoint-desc">Get your account statistics</p>
+              <div class="code-block">
+                <pre><code>curl https://jmplnk.uk/api/user/stats \
+  -H "Authorization: Bearer YOUR_TOKEN"</code></pre>
+              </div>
+              <div class="response-example">
+                <strong>Response:</strong>
+                <pre><code>{
+  "totalLinks": 12,
+  "totalVisits": 3456,
+  "activeLinks": 10,
+  "avgClicks": 288
+}</code></pre>
+              </div>
+            </div>
+
+            <div class="endpoint-group">
+              <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <code class="endpoint-url">/api/user/links</code>
+              </div>
+              <p class="endpoint-desc">Get all your shortened links</p>
+              <div class="code-block">
+                <pre><code>curl https://jmplnk.uk/api/user/links \
+  -H "Authorization: Bearer YOUR_TOKEN"</code></pre>
+              </div>
+            </div>
+
+            <div class="endpoint-group">
+              <div class="endpoint-header">
+                <span class="method method-get">GET</span>
+                <code class="endpoint-url">/api/stats/:shortCode</code>
+              </div>
+              <p class="endpoint-desc">Get detailed statistics for a specific link</p>
+              <div class="code-block">
+                <pre><code>curl https://jmplnk.uk/api/stats/mylink \
+  -H "Authorization: Bearer YOUR_TOKEN"</code></pre>
+              </div>
+              <div class="response-example">
+                <strong>Response:</strong>
+                <pre><code>{
+  "stats": {
+    "short_code": "mylink",
+    "visit_count": 142,
+    "created_at": "2025-11-29T10:30:00Z",
+    "last_visit": "2025-11-29T15:45:00Z"
+  },
+  "referrers": [
+    {"referrer": "twitter.com", "count": 45},
+    {"referrer": "facebook.com", "count": 32}
+  ]
+}</code></pre>
+              </div>
+            </div>
+
+            <div class="api-notes">
+              <h5>📌 Important Notes</h5>
+              <ul>
+                <li><strong>Authentication:</strong> Include your token in the <code>Authorization: Bearer YOUR_TOKEN</code> header for all requests</li>
+                <li><strong>Rate Limiting:</strong> API is limited to 1000 requests per hour per account</li>
+                <li><strong>Token Security:</strong> Never expose your token in client-side code or public repositories</li>
+                <li><strong>Expiration:</strong> Tokens expire after 7 days. Login again to get a new token</li>
+                <li><strong>HTTPS Only:</strong> All API requests must use HTTPS protocol</li>
+              </ul>
+            </div>
+
+            <div class="api-examples">
+              <h5>💡 Code Examples</h5>
+              
+              <div class="example-tabs">
+                <button class="tab-btn active" data-lang="javascript">JavaScript</button>
+                <button class="tab-btn" data-lang="python">Python</button>
+                <button class="tab-btn" data-lang="php">PHP</button>
+              </div>
+
+              <div class="example-content" data-lang="javascript">
+                <pre><code>// JavaScript/Node.js Example
+const token = 'YOUR_TOKEN_HERE';
+
+async function shortenUrl(originalUrl, customCode = null) {
+  const response = await fetch('https://jmplnk.uk/api/shorten', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      url: originalUrl,
+      shortCode: customCode
+    })
+  });
+  
+  const data = await response.json();
+  console.log('Shortened URL:', data.url);
+  return data;
+}
+
+// Usage
+shortenUrl('https://example.com/long/url', 'mylink');</code></pre>
+              </div>
+
+              <div class="example-content" data-lang="python" style="display: none;">
+                <pre><code># Python Example
+import requests
+
+token = 'YOUR_TOKEN_HERE'
+headers = {
+    'Authorization': f'Bearer {token}',
+    'Content-Type': 'application/json'
+}
+
+def shorten_url(original_url, custom_code=None):
+    payload = {'url': original_url}
+    if custom_code:
+        payload['shortCode'] = custom_code
+    
+    response = requests.post(
+        'https://jmplnk.uk/api/shorten',
+        headers=headers,
+        json=payload
+    )
+    
+    data = response.json()
+    print(f"Shortened URL: {data['url']}")
+    return data
+
+# Usage
+shorten_url('https://example.com/long/url', 'mylink')</code></pre>
+              </div>
+
+              <div class="example-content" data-lang="php" style="display: none;">
+                <pre><code>&lt;?php
+// PHP Example
+$token = 'YOUR_TOKEN_HERE';
+
+function shortenUrl($originalUrl, $customCode = null) {
+    global $token;
+    
+    $data = ['url' => $originalUrl];
+    if ($customCode) {
+        $data['shortCode'] = $customCode;
+    }
+    
+    $ch = curl_init('https://jmplnk.uk/api/shorten');
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $token,
+        'Content-Type: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    $result = json_decode($response, true);
+    echo "Shortened URL: " . $result['url'] . "\n";
+    return $result;
+}
+
+// Usage
+shortenUrl('https://example.com/long/url', 'mylink');
+?&gt;</code></pre>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -194,7 +432,16 @@
         document.getElementById('account-email').textContent = payload.email;
         document.getElementById('account-type').textContent = payload.plan || 'PRO';
         document.getElementById('member-since').textContent = new Date(payload.iat * 1000).toLocaleDateString();
-        document.getElementById('api-token').textContent = token.substring(0, 40) + '...';
+        
+        // Set full API token
+        document.getElementById('api-token-full').textContent = token;
+        
+        // Calculate token expiry
+        if (payload.exp) {
+          const expiryDate = new Date(payload.exp * 1000);
+          const daysLeft = Math.ceil((expiryDate - Date.now()) / (1000 * 60 * 60 * 24));
+          document.getElementById('token-expiry').textContent = `${daysLeft} days remaining`;
+        }
 
         // Load user stats and links
         await loadUserStats();
@@ -339,8 +586,47 @@
     document.getElementById('refresh-links').addEventListener('click', loadUserLinks);
 
     document.getElementById('copy-token-btn').addEventListener('click', () => {
+      const btn = document.getElementById('copy-token-btn');
+      const btnText = document.getElementById('copy-token-text');
+      
       navigator.clipboard.writeText(token).then(() => {
+        btnText.textContent = '✓ Copied!';
+        btn.classList.add('btn-success');
+        setTimeout(() => {
+          btnText.textContent = '📋 Copy Token';
+          btn.classList.remove('btn-success');
+        }, 2000);
         showNotification('API token copied to clipboard!');
+      });
+    });
+
+    // Toggle API documentation
+    document.getElementById('toggle-api-docs').addEventListener('click', () => {
+      const docs = document.getElementById('api-docs');
+      const btn = document.getElementById('toggle-api-docs');
+      
+      if (docs.style.display === 'none') {
+        docs.style.display = 'block';
+        btn.textContent = '📖 Hide Documentation';
+      } else {
+        docs.style.display = 'none';
+        btn.textContent = '📖 View Documentation';
+      }
+    });
+
+    // Code example tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        
+        // Update active tab
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Show corresponding example
+        document.querySelectorAll('.example-content').forEach(ex => {
+          ex.style.display = ex.dataset.lang === lang ? 'block' : 'none';
+        });
       });
     });
 
