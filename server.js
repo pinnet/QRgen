@@ -78,7 +78,12 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, staticDir, 'login.html'));
 });
 
-// Serve stats page (we'll create a simple stats viewer)
+// Serve stats home page
+app.get('/stats', (req, res) => {
+  res.sendFile(path.join(__dirname, staticDir, 'stats.html'));
+});
+
+// API endpoint for stats (keep existing for backward compatibility)
 app.get('/stats/:shortCode', async (req, res) => {
   const { shortCode } = req.params;
   const stats = await db.getStats(shortCode);

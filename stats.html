@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View statistics and analytics for your shortened URLs.">
+  <title>Statistics - JmpLnk</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/icons/icon-192x192.png" type="image/png">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="stats.css">
+</head>
+<body>
+  <!-- Decorative particles -->
+  <div class="particle" style="width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s;"></div>
+  <div class="particle" style="width: 60px; height: 60px; top: 70%; left: 80%; animation-delay: 5s;"></div>
+  <div class="particle" style="width: 80px; height: 80px; top: 40%; left: 5%; animation-delay: 10s;"></div>
+  
+  <div class="container">
+    <!-- Header with Navigation -->
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1rem 0;">
+      <a href="/shorten" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;">
+        ← Back to Shortener
+      </a>
+      <a href="/login" class="btn btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 0.5rem 1rem;">
+        🔐 Login
+      </a>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="stats-hero">
+      <h1 class="stats-title">📊 Link Statistics</h1>
+      <p class="stats-subtitle">View analytics and performance data for your shortened URLs</p>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section">
+      <div class="search-card">
+        <h2 style="margin-top: 0; color: var(--text-primary); font-size: 1.5rem;">🔍 Look Up Your Link</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Enter your short code to view detailed statistics</p>
+        
+        <form id="stats-form" class="stats-form">
+          <div class="stats-input-group">
+            <span class="domain-prefix">{domain}/</span>
+            <input 
+              type="text" 
+              id="short-code-input" 
+              class="stats-input" 
+              placeholder="abc123"
+              pattern="^[a-zA-Z0-9_-]+$"
+              required
+              aria-label="Short code"
+            >
+            <button type="submit" class="btn btn-primary">
+              View Stats
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Stats Display Section -->
+    <section class="stats-display" id="stats-display" style="display: none;">
+      <div class="stats-card">
+        <div class="stats-header">
+          <h2 style="margin: 0; color: var(--text-primary);">
+            <span id="display-short-code"></span>
+          </h2>
+          <a href="#" id="original-url-link" target="_blank" rel="noopener noreferrer" style="color: var(--text-secondary); font-size: 0.9rem; word-break: break-all;"></a>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-icon">👁️</div>
+            <div class="stat-value" id="total-visits">0</div>
+            <div class="stat-label">Total Visits</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon">📅</div>
+            <div class="stat-value" id="created-date">-</div>
+            <div class="stat-label">Created</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon">🔗</div>
+            <div class="stat-value" id="link-status">Active</div>
+            <div class="stat-label">Status</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-value" id="last-visit">Never</div>
+            <div class="stat-label">Last Visit</div>
+          </div>
+        </div>
+
+        <!-- Referrers Section -->
+        <div class="referrers-section">
+          <h3 style="color: var(--text-primary); margin-bottom: 1rem;">📈 Top Referrers</h3>
+          <div id="referrers-list" class="referrers-list">
+            <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No referrer data available yet</p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="stats-actions">
+          <button class="btn btn-secondary" id="copy-link-btn">
+            📋 Copy Link
+          </button>
+          <button class="btn btn-secondary" id="create-qr-btn">
+            🎨 Create QR Code
+          </button>
+          <a href="/shorten" class="btn btn-secondary" style="text-decoration: none;">
+            ➕ Create New Link
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Links Section -->
+    <section class="quick-links">
+      <h3 style="text-align: center; color: var(--text-primary); margin-bottom: 2rem;">Popular Links</h3>
+      <div id="popular-links" class="popular-grid">
+        <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">Loading popular links...</p>
+      </div>
+    </section>
+
+    <!-- Upgrade CTA -->
+    <section class="upgrade-cta">
+      <h3 style="margin-top: 0; color: var(--text-primary);">Want More Insights?</h3>
+      <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+        Get detailed analytics, custom reports, and advanced tracking with a free account
+      </p>
+      <a href="/login" class="btn btn-primary" style="text-decoration: none;">
+        Sign Up for Free Analytics
+      </a>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 2rem 1rem; color: var(--text-tertiary); font-size: 0.875rem;">
+      <p>Powered by <a href="/" style="color: var(--primary); text-decoration: none;">QR Gen</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const statsForm = document.getElementById('stats-form');
+    const shortCodeInput = document.getElementById('short-code-input');
+    const statsDisplay = document.getElementById('stats-display');
+    const domainPrefix = document.querySelector('.domain-prefix');
+    
+    let currentShortCode = null;
+
+    // Set domain in placeholder
+    domainPrefix.textContent = window.location.origin + '/';
+
+    // Check if there's a short code in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlShortCode = urlParams.get('code');
+    if (urlShortCode) {
+      shortCodeInput.value = urlShortCode;
+      loadStats(urlShortCode);
+    }
+
+    statsForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const shortCode = shortCodeInput.value.trim();
+      if (shortCode) {
+        await loadStats(shortCode);
+      }
+    });
+
+    async function loadStats(shortCode) {
+      try {
+        const submitBtn = statsForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Loading...';
+
+        const response = await fetch(`/api/stats/${shortCode}`);
+        
+        if (!response.ok) {
+          throw new Error('Short code not found');
+        }
+
+        const data = await response.json();
+        currentShortCode = shortCode;
+        
+        displayStats(data, shortCode);
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'View Stats';
+        
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+        const submitBtn = statsForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'View Stats';
+      }
+    }
+
+    function displayStats(data, shortCode) {
+      const stats = data.stats;
+      const referrers = data.referrers || [];
+
+      // Update display
+      document.getElementById('display-short-code').textContent = `${window.location.origin}/${shortCode}`;
+      document.getElementById('original-url-link').textContent = stats.original_url;
+      document.getElementById('original-url-link').href = stats.original_url;
+      
+      document.getElementById('total-visits').textContent = stats.visit_count || 0;
+      document.getElementById('created-date').textContent = formatDate(stats.created_at);
+      document.getElementById('link-status').textContent = stats.is_active ? 'Active' : 'Inactive';
+      document.getElementById('last-visit').textContent = stats.last_visit_at ? formatDate(stats.last_visit_at) : 'Never';
+
+      // Update referrers
+      const referrersList = document.getElementById('referrers-list');
+      if (referrers.length > 0) {
+        referrersList.innerHTML = referrers.map(ref => `
+          <div class="referrer-item">
+            <div class="referrer-domain">${ref.referrer_domain || 'Direct'}</div>
+            <div class="referrer-count">${ref.visit_count} visits</div>
+          </div>
+        `).join('');
+      } else {
+        referrersList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No referrer data available yet</p>';
+      }
+
+      // Show stats display
+      statsDisplay.style.display = 'block';
+      statsDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diff = now - date;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      
+      if (days === 0) return 'Today';
+      if (days === 1) return 'Yesterday';
+      if (days < 7) return `${days} days ago`;
+      if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+      
+      return date.toLocaleDateString();
+    }
+
+    // Copy link button
+    document.getElementById('copy-link-btn').addEventListener('click', async () => {
+      if (currentShortCode) {
+        const shortUrl = `${window.location.origin}/${currentShortCode}`;
+        try {
+          await navigator.clipboard.writeText(shortUrl);
+          const btn = document.getElementById('copy-link-btn');
+          btn.textContent = '✅ Copied!';
+          setTimeout(() => {
+            btn.textContent = '📋 Copy Link';
+          }, 2000);
+        } catch (error) {
+          alert('Failed to copy: ' + shortUrl);
+        }
+      }
+    });
+
+    // Create QR code button
+    document.getElementById('create-qr-btn').addEventListener('click', () => {
+      if (currentShortCode) {
+        const shortUrl = `${window.location.origin}/${currentShortCode}`;
+        window.location.href = `/?url=${encodeURIComponent(shortUrl)}`;
+      }
+    });
+
+    // Load popular links
+    async function loadPopularLinks() {
+      try {
+        const response = await fetch('/api/urls/popular?limit=6');
+        const data = await response.json();
+        
+        const popularGrid = document.getElementById('popular-links');
+        if (data.success && data.urls && data.urls.length > 0) {
+          popularGrid.innerHTML = data.urls.map(url => `
+            <div class="popular-item" onclick="document.getElementById('short-code-input').value='${url.short_code}'; loadStats('${url.short_code}')">
+              <div class="popular-code">${url.short_code}</div>
+              <div class="popular-visits">${url.visits || 0} visits</div>
+            </div>
+          `).join('');
+        } else {
+          popularGrid.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No popular links yet</p>';
+        }
+      } catch (error) {
+        console.error('Failed to load popular links:', error);
+      }
+    }
+
+    // Load popular links on page load
+    loadPopularLinks();
+  </script>
+</body>
+</html>

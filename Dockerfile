@@ -31,9 +31,11 @@ RUN mkdir -p public/icons
 COPY index.html ./public/
 COPY shorten.html ./public/
 COPY login.html ./public/
+COPY stats.html ./public/
 COPY index.css ./public/
 COPY shorten.css ./public/
 COPY login.css ./public/
+COPY stats.css ./public/
 COPY app.js ./public/
 COPY qrcode.min.js ./public/
 COPY manifest.json ./public/
