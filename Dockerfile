@@ -24,6 +24,7 @@ COPY package*.json ./
 COPY server.js ./
 COPY db.js ./
 COPY init-db.sql ./
+COPY test-url-shortening.js ./
 
 # Create public directory and copy static files
 RUN mkdir -p public/icons
