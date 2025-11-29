@@ -68,14 +68,22 @@
           </button>
         </div>
         
-        <input 
-          type="text" 
-          id="custom-code" 
-          class="custom-code-input" 
-          placeholder="Custom short code (optional) - e.g., 'mylink'"
-          pattern="^[a-zA-Z0-9_-]{3,20}$"
-          aria-label="Custom short code"
-        >
+        <div style="position: relative;">
+          <input 
+            type="text" 
+            id="custom-code" 
+            class="custom-code-input" 
+            placeholder="Custom short code (PRO feature) - e.g., 'mylink'"
+            pattern="^[a-zA-Z0-9_-]{3,20}$"
+            aria-label="Custom short code"
+            disabled
+            style="opacity: 0.6; cursor: not-allowed;"
+          >
+          <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #8845ff 0%, #ff4545 100%); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; pointer-events: none;">PRO</span>
+        </div>
+        <p style="margin: 0.5rem 0 0; font-size: 0.875rem; color: var(--text-secondary); text-align: center;">
+          Want custom short codes? <a href="/login" style="color: var(--primary); text-decoration: none; font-weight: 600;">Upgrade to PRO</a>
+        </p>
       </form>
 
       <!-- Result Section -->
@@ -206,6 +214,13 @@
 
       if (!originalUrl) {
         alert('Please enter a URL to shorten');
+        return;
+      }
+
+      // Check if user is trying to use custom code (PRO feature)
+      if (customCode) {
+        alert('Custom short codes are a PRO feature. Please upgrade your account to use custom codes.');
+        window.location.href = '/login';
         return;
       }
 
