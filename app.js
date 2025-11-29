@@ -35,6 +35,10 @@ const PRESETS = {
     text: 'https://github.com/pinnet/QRgen',
     description: 'Example URL'
   },
+  'short-url': {
+    text: null, // Special handling - opens URL shortening dialog
+    description: 'Create shortened URL'
+  },
   wifi: {
     text: 'WIFI:T:WPA;S:MyNetworkName;P:MyPassword123;;',
     description: 'WiFi: Replace network name and password'
@@ -251,6 +255,12 @@ class QRCodeGenerator {
   applyPreset(presetName) {
     const preset = PRESETS[presetName];
     if (preset) {
+      // Special handling for short-url preset
+      if (presetName === 'short-url') {
+        this.openUrlShorteningDialog();
+        return;
+      }
+      
       this.textInput.value = preset.text;
       this.updateCharCounter();
       this.showNotification(`📋 ${preset.description} loaded`, 'info');
@@ -260,6 +270,61 @@ class QRCodeGenerator {
       setTimeout(() => {
         this.generateQRCode();
       }, 300);
+    }
+  }
+
+  async openUrlShorteningDialog() {
+    const originalUrl = prompt('Enter the URL you want to shorten:\n\n(This will create a short link and generate a QR code for it)', 'https://');
+    
+    if (!originalUrl) {
+      return; // User cancelled
+    }
+
+    // Validate URL
+    try {
+      new URL(originalUrl);
+    } catch (e) {
+      this.showNotification('❌ Invalid URL format', 'error');
+      return;
+    }
+
+    // Optional: ask for custom short code
+    const customCode = prompt('Enter a custom short code (optional):\n\nLeave empty to auto-generate\nExample: "mylink" → ' + window.location.origin + '/mylink', '');
+
+    try {
+      this.showNotification('⏳ Creating shortened URL...', 'info');
+      
+      const response = await fetch('/api/shorten', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          url: originalUrl,
+          shortCode: customCode || undefined
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create shortened URL');
+      }
+
+      const data = await response.json();
+      const shortUrl = `${window.location.origin}/${data.short_code}`;
+      
+      // Set the short URL as the QR code content
+      this.textInput.value = shortUrl;
+      this.updateCharCounter();
+      this.showNotification(`✅ Short URL created: ${shortUrl}`, 'success');
+      
+      // Auto-generate QR code
+      setTimeout(() => {
+        this.generateQRCode();
+      }, 300);
+      
+    } catch (error) {
+      this.showNotification(`❌ ${error.message}`, 'error');
     }
   }
 
