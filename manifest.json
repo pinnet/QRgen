@@ -10,15 +10,51 @@
   "categories": ["utilities", "productivity"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%238845ff' rx='48'/><path fill='white' d='M48 48h24v24H48zm0 32h24v24H48zm32-32h24v24H80zm0 32h24v24H80zm32-32h24v24h-24zm0 32h24v24h-24zM48 120h24v24H48zm32 0h24v24H80zm32 0h24v24h-24z'/></svg>",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%238845ff' rx='128'/><path fill='white' d='M128 128h64v64h-64zm0 96h64v64h-64zm96-96h64v64h-64zm0 96h64v64h-64zm96-96h64v64h-64zm0 96h64v64h-64zM128 320h64v64h-64zm96 0h64v64h-64zm96 0h64v64h-64z'/></svg>",
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],

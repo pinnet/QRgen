@@ -1,11 +1,14 @@
 // Service Worker for QR Gen PWA
-const CACHE_NAME = 'qr-gen-v1';
+const CACHE_NAME = 'qr-gen-v2';
 const urlsToCache = [
   '/',
   '/index.html',
   '/index.css',
   '/app.js',
-  '/qrcode.min.js'
+  '/qrcode.min.js',
+  '/manifest.json',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png'
 ];
 
 // Install event - cache essential files

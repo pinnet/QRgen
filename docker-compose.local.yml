@@ -3,16 +3,16 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: qrgen-postgres
+    container_name: qrgen-postgres-local
     environment:
       - POSTGRES_DB=qrgen
       - POSTGRES_USER=qrgen_user
       - POSTGRES_PASSWORD=qrgen_secure_password_change_me
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_local:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
-      - nginxpm_default
+      - qrgen_local
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U qrgen_user -d qrgen"]
@@ -23,7 +23,7 @@ services:
 
   qrgen:
     build: .
-    container_name: qrgen
+    container_name: qrgen-local
     ports:
       - "8080:8080"
     environment:
@@ -34,12 +34,12 @@ services:
     tty: true
     stdin_open: true
     networks:
-      - nginxpm_default
+      - qrgen_local
     depends_on:
       postgres:
         condition: service_healthy
     labels:
-      - "com.qrgen.description=QR Code Generator Web Application"
+      - "com.qrgen.description=QR Code Generator Web Application - Local Testing"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
       interval: 30s
@@ -48,9 +48,9 @@ services:
       start_period: 5s
 
 volumes:
-  postgres_data:
+  postgres_data_local:
     driver: local
 
 networks:
-  nginxpm_default:
-    external: true
+  qrgen_local:
+    driver: bridge

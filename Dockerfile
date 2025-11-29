@@ -22,19 +22,26 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy application files
 COPY package*.json ./
 COPY server.js ./
+COPY db.js ./
+COPY init-db.sql ./
+COPY test-url-shortening.js ./
 
 # Create public directory and copy static files
-RUN mkdir -p public
+RUN mkdir -p public/icons
 COPY index.html ./public/
 COPY index.css ./public/
 COPY app.js ./public/
 COPY qrcode.min.js ./public/
 COPY manifest.json ./public/
 COPY service-worker.js ./public/
+COPY icons/*.png ./public/icons/
 
 # Set production environment
 ENV NODE_ENV=production
 ENV PORT=8080
+
+# Install wget for health checks (must be done before switching to non-root user)
+RUN apk add --no-cache wget
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
@@ -49,7 +56,7 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://127.0.0.1:8080/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
 # Start the server
 CMD ["node", "server.js"]
