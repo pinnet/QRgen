@@ -29,19 +29,39 @@ app.use(compression());
 // Determine static files directory (public/ in Docker, root for local dev)
 const staticDir = process.env.STATIC_DIR || (require('fs').existsSync(path.join(__dirname, 'public')) ? 'public' : '.');
 
+// Custom middleware for proper PWA caching
+app.use((req, res, next) => {
+  const filePath = req.path;
+  
+  // Service Worker - NEVER cache, always fresh
+  if (filePath.endsWith('service-worker.js')) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Service-Worker-Allowed', '/');
+  }
+  // Manifest - check frequently for updates
+  else if (filePath.endsWith('manifest.json')) {
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  }
+  // HTML - always revalidate
+  else if (filePath.endsWith('.html')) {
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  }
+  // Static assets (JS/CSS) - cache with validation
+  else if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
+    res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
+  }
+  // Images and other static content
+  else if (filePath.match(/\.(png|jpg|jpeg|gif|svg|ico|webp)$/i)) {
+    res.setHeader('Cache-Control', 'public, max-age=604800');
+  }
+  
+  next();
+});
+
 // Serve static files
 app.use(express.static(path.join(__dirname, staticDir), {
-  maxAge: '1y',
   etag: true,
-  lastModified: true,
-  setHeaders: (res, filePath) => {
-    // Cache static assets aggressively
-    if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    } else if (filePath.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
-    }
-  }
+  lastModified: true
 }));
 
 // Health check endpoint

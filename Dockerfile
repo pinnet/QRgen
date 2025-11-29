@@ -24,13 +24,14 @@ COPY package*.json ./
 COPY server.js ./
 
 # Create public directory and copy static files
-RUN mkdir -p public
+RUN mkdir -p public/icons
 COPY index.html ./public/
 COPY index.css ./public/
 COPY app.js ./public/
 COPY qrcode.min.js ./public/
 COPY manifest.json ./public/
 COPY service-worker.js ./public/
+COPY icons/*.png ./public/icons/
 
 # Set production environment
 ENV NODE_ENV=production
