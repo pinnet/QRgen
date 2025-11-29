@@ -29,6 +29,7 @@ COPY test-url-shortening.js ./
 # Create public directory and copy static files
 RUN mkdir -p public/icons
 COPY index.html ./public/
+COPY shorten.html ./public/
 COPY index.css ./public/
 COPY app.js ./public/
 COPY qrcode.min.js ./public/

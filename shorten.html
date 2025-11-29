@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create shortened URLs with QR codes instantly. Free URL shortening service with analytics and referrer tracking.">
+  <meta name="keywords" content="URL shortener, short links, QR codes, link shortening, analytics">
+  <meta name="author" content="JmpLnk">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="JmpLnk - URL Shortening & QR Codes">
+  <meta property="og:description" content="Create shortened URLs with custom QR codes. Track visits and analyze referrer statistics.">
+  
+  <title>JmpLnk - URL Shortening & QR Codes</title>
+  
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#8845ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="JmpLnk">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/icons/icon-192x192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="index.css">
+  
+  <style>
+    .hero-section {
+      text-align: center;
+      padding: 4rem 1rem 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+    }
+
+    .shorten-form {
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .url-input-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .url-input {
+      flex: 1;
+      padding: 1rem;
+      font-size: 1rem;
+      border: 2px solid rgba(136, 69, 255, 0.2);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .custom-code-input {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+      border: 2px solid rgba(136, 69, 255, 0.2);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .custom-code-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .result-section {
+      display: none;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(136, 69, 255, 0.1);
+      border: 2px solid rgba(136, 69, 255, 0.3);
+      border-radius: 16px;
+      animation: slideIn 0.3s ease;
+    }
+
+    .result-section.show {
+      display: block;
+    }
+
+    .short-url-display {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary);
+      word-break: break-all;
+      margin-bottom: 1rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 3rem auto;
+      padding: 0 1rem;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(136, 69, 255, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .feature-description {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .url-input-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Decorative particles -->
+  <div class="particle" style="width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s;"></div>
+  <div class="particle" style="width: 60px; height: 60px; top: 70%; left: 80%; animation-delay: 5s;"></div>
+  <div class="particle" style="width: 80px; height: 80px; top: 40%; left: 5%; animation-delay: 10s;"></div>
+  
+  <div class="container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1 class="hero-title">🎯 JmpLnk</h1>
+      <p class="hero-subtitle">Create shortened URLs with beautiful QR codes. Track visits and analyze your links.</p>
+      
+      <!-- Shorten Form -->
+      <form class="shorten-form" id="shorten-form">
+        <div class="url-input-group">
+          <input 
+            type="url" 
+            id="original-url" 
+            class="url-input" 
+            placeholder="Enter your long URL here..." 
+            required
+            aria-label="URL to shorten"
+          >
+          <button type="submit" class="btn btn-primary">
+            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Shorten
+          </button>
+        </div>
+        
+        <input 
+          type="text" 
+          id="custom-code" 
+          class="custom-code-input" 
+          placeholder="Custom short code (optional) - e.g., 'mylink'"
+          pattern="^[a-zA-Z0-9_-]{3,20}$"
+          aria-label="Custom short code"
+        >
+      </form>
+
+      <!-- Result Section -->
+      <div class="result-section" id="result-section">
+        <h3 style="margin-top: 0; color: var(--text-primary);">✨ Your Shortened URL</h3>
+        <div class="short-url-display" id="short-url-display"></div>
+        <div class="action-buttons">
+          <button class="btn btn-primary" id="copy-url-btn">
+            📋 Copy Link
+          </button>
+          <button class="btn btn-secondary" id="view-qr-btn">
+            🎨 Create QR Code
+          </button>
+          <button class="btn btn-secondary" id="view-stats-btn">
+            📊 View Stats
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <h3 class="feature-title">Short & Sweet</h3>
+        <p class="feature-description">Create memorable short links that are easy to share and remember</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3 class="feature-title">QR Codes</h3>
+        <p class="feature-description">Generate beautiful, customizable QR codes for your shortened URLs</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">Analytics</h3>
+        <p class="feature-description">Track visits and see where your traffic comes from with referrer tracking</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 class="feature-title">Lightning Fast</h3>
+        <p class="feature-description">Instant redirects with 301 permanent redirects for SEO optimization</p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 2rem 1rem; color: var(--text-tertiary); font-size: 0.875rem;">
+      <p>Powered by <a href="/" style="color: var(--primary); text-decoration: none;">QR Gen</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('shorten-form');
+    const originalUrlInput = document.getElementById('original-url');
+    const customCodeInput = document.getElementById('custom-code');
+    const resultSection = document.getElementById('result-section');
+    const shortUrlDisplay = document.getElementById('short-url-display');
+    const copyUrlBtn = document.getElementById('copy-url-btn');
+    const viewQrBtn = document.getElementById('view-qr-btn');
+    const viewStatsBtn = document.getElementById('view-stats-btn');
+
+    let currentShortCode = null;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const originalUrl = originalUrlInput.value.trim();
+      const customCode = customCodeInput.value.trim();
+
+      if (!originalUrl) {
+        alert('Please enter a URL to shorten');
+        return;
+      }
+
+      try {
+        // Disable submit button
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating...';
+
+        const response = await fetch('/api/shorten', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            url: originalUrl,
+            shortCode: customCode || undefined
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to create shortened URL');
+        }
+
+        const data = await response.json();
+        currentShortCode = data.short_code;
+        const shortUrl = `${window.location.origin}/${data.short_code}`;
+
+        // Display result
+        shortUrlDisplay.textContent = shortUrl;
+        resultSection.classList.add('show');
+
+        // Reset form
+        originalUrlInput.value = '';
+        customCodeInput.value = '';
+
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Shorten
+        `;
+
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Shorten
+        `;
+      }
+    });
+
+    copyUrlBtn.addEventListener('click', async () => {
+      const shortUrl = shortUrlDisplay.textContent;
+      try {
+        await navigator.clipboard.writeText(shortUrl);
+        copyUrlBtn.textContent = '✅ Copied!';
+        setTimeout(() => {
+          copyUrlBtn.textContent = '📋 Copy Link';
+        }, 2000);
+      } catch (error) {
+        alert('Failed to copy. Please copy manually: ' + shortUrl);
+      }
+    });
+
+    viewQrBtn.addEventListener('click', () => {
+      const shortUrl = shortUrlDisplay.textContent;
+      window.location.href = `/?url=${encodeURIComponent(shortUrl)}`;
+    });
+
+    viewStatsBtn.addEventListener('click', () => {
+      if (currentShortCode) {
+        window.location.href = `/stats/${currentShortCode}`;
+      }
+    });
+  </script>
+</body>
+</html>

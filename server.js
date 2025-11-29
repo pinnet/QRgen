@@ -68,6 +68,29 @@ app.use(express.static(path.join(__dirname, staticDir), {
   lastModified: true
 }));
 
+// Serve URL shortening page
+app.get('/shorten', (req, res) => {
+  res.sendFile(path.join(__dirname, staticDir, 'shorten.html'));
+});
+
+// Serve stats page (we'll create a simple stats viewer)
+app.get('/stats/:shortCode', async (req, res) => {
+  const { shortCode } = req.params;
+  const stats = await db.getStats(shortCode);
+  
+  if (!stats.success) {
+    return res.status(404).send('Short code not found');
+  }
+  
+  const referrers = await db.getReferrerStats(shortCode);
+  
+  // Return JSON for now (could create HTML page later)
+  res.json({
+    stats: stats.data,
+    referrers: referrers.data || []
+  });
+});
+
 // Health check endpoint
 app.get('/health', async (req, res) => {
   const dbHealth = await db.testConnection();

@@ -36,8 +36,9 @@ const PRESETS = {
     description: 'Example URL'
   },
   'short-url': {
-    text: null, // Special handling - opens URL shortening dialog
-    description: 'Create shortened URL'
+    text: null, // Special handling - opens URL shortening page
+    description: 'Create shortened URL',
+    action: 'open-page' // Indicates this opens a new page
   },
   wifi: {
     text: 'WIFI:T:WPA;S:MyNetworkName;P:MyPassword123;;',
@@ -255,9 +256,9 @@ class QRCodeGenerator {
   applyPreset(presetName) {
     const preset = PRESETS[presetName];
     if (preset) {
-      // Special handling for short-url preset
+      // Special handling for short-url preset - open shortening page
       if (presetName === 'short-url') {
-        this.openUrlShorteningDialog();
+        window.location.href = '/shorten';
         return;
       }
       

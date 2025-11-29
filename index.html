@@ -218,6 +218,29 @@
   
   <!-- Service Worker Registration -->
   <script>
+    // Check for URL parameter and pre-fill if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlParam = urlParams.get('url');
+    if (urlParam) {
+      // Wait for DOM to load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          const textInput = document.getElementById('qr-text');
+          if (textInput) {
+            textInput.value = decodeURIComponent(urlParam);
+            // Trigger input event to update character counter
+            textInput.dispatchEvent(new Event('input'));
+          }
+        });
+      } else {
+        const textInput = document.getElementById('qr-text');
+        if (textInput) {
+          textInput.value = decodeURIComponent(urlParam);
+          textInput.dispatchEvent(new Event('input'));
+        }
+      }
+    }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
