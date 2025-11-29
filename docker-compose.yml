@@ -31,6 +31,8 @@ services:
       - PORT=8080
       - DATABASE_URL=postgresql://qrgen_user:qrgen_secure_password_change_me@postgres:5432/qrgen
     restart: unless-stopped
+    tty: true
+    stdin_open: true
     networks:
       - nginxpm_default
     depends_on:
