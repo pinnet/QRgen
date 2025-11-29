@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: qrgen-postgres
+    environment:
+      - POSTGRES_DB=qrgen
+      - POSTGRES_USER=qrgen_user
+      - POSTGRES_PASSWORD=qrgen_secure_password_change_me
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - nginxpm_default
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qrgen_user -d qrgen"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   qrgen:
     build: .
     container_name: qrgen
@@ -9,9 +29,13 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8080
+      - DATABASE_URL=postgresql://qrgen_user:qrgen_secure_password_change_me@postgres:5432/qrgen
     restart: unless-stopped
     networks:
       - nginxpm_default
+    depends_on:
+      postgres:
+        condition: service_healthy
     labels:
       - "com.qrgen.description=QR Code Generator Web Application"
     healthcheck:
@@ -20,6 +44,10 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
+
+volumes:
+  postgres_data:
+    driver: local
 
 networks:
   nginxpm_default:
