@@ -236,7 +236,7 @@ class QRCodeGenerator {
       const length = this.textInput.value.length;
       const max = CONFIG.QR_LIMITS.MAX_TEXT_LENGTH;
       counter.textContent = `${length.toLocaleString()} / ${max.toLocaleString()}`;
-      
+
       // Color code the counter
       if (length > max * 0.9) {
         counter.style.color = 'hsl(0, 72%, 51%)'; // Red
@@ -255,7 +255,7 @@ class QRCodeGenerator {
       this.updateCharCounter();
       this.showNotification(`📋 ${preset.description} loaded`, 'info');
       this.textInput.focus();
-      
+
       // Auto-generate after short delay
       setTimeout(() => {
         this.generateQRCode();
@@ -276,9 +276,9 @@ class QRCodeGenerator {
 
     // Check length limits
     if (text.length > CONFIG.QR_LIMITS.MAX_TEXT_LENGTH) {
-      return { 
-        valid: false, 
-        error: `Content too long (${text.length} characters). Maximum is ${CONFIG.QR_LIMITS.MAX_TEXT_LENGTH} characters.` 
+      return {
+        valid: false,
+        error: `Content too long (${text.length} characters). Maximum is ${CONFIG.QR_LIMITS.MAX_TEXT_LENGTH} characters.`
       };
     }
 
@@ -287,9 +287,9 @@ class QRCodeGenerator {
       try {
         const url = new URL(text);
         if (text.length > CONFIG.QR_LIMITS.MAX_URL_LENGTH) {
-          return { 
-            valid: false, 
-            error: `URL too long. Keep it under ${CONFIG.QR_LIMITS.MAX_URL_LENGTH} characters for best compatibility.` 
+          return {
+            valid: false,
+            error: `URL too long. Keep it under ${CONFIG.QR_LIMITS.MAX_URL_LENGTH} characters for best compatibility.`
           };
         }
       } catch (e) {
@@ -299,32 +299,47 @@ class QRCodeGenerator {
 
     // Validate WiFi format if it looks like WiFi config
     if (text.startsWith('WIFI:')) {
-      const wifiPattern = /^WIFI:(?:T:[^;]*;)?(?:S:[^;]*;)?(?:P:[^;]*;)?(?:H:[^;]*;)?;$/;
-      if (!wifiPattern.test(text)) {
-        return { 
-          valid: false, 
-          error: 'Invalid WiFi format. Use: WIFI:T:WPA;S:NetworkName;P:Password;;' 
+      // More flexible WiFi validation - just check for basic structure
+      // Format: WIFI:T:type;S:ssid;P:password;H:hidden;;
+      // Fields can be in any order, some are optional
+      if (!text.endsWith(';;')) {
+        return {
+          valid: false,
+          error: 'WiFi format must end with double semicolon (;;)'
         };
+      }
+
+      // Check for required SSID field
+      if (!text.includes('S:')) {
+        return {
+          valid: false,
+          error: 'WiFi format requires network name (S:NetworkName). Example: WIFI:T:WPA;S:MyNetwork;P:Password;;'
+        };
+      }
+
+      // Warn if no password (open network)
+      if (!text.includes('P:') && !text.includes('T:nopass')) {
+        console.warn('WiFi QR code has no password - this will create an open network QR code');
       }
     }
 
     // Validate color contrast for scannability
     const darkColor = this.darkColorPicker.value;
     const lightColor = this.lightColorPicker.value;
-    
+
     if (darkColor.toLowerCase() === lightColor.toLowerCase()) {
-      return { 
-        valid: false, 
-        error: 'Dark and light colors must be different for QR code to be scannable.' 
+      return {
+        valid: false,
+        error: 'Dark and light colors must be different for QR code to be scannable.'
       };
     }
 
     // Check contrast ratio (simplified check)
     const contrastRatio = this.getContrastRatio(darkColor, lightColor);
     if (contrastRatio < 3) {
-      return { 
-        valid: false, 
-        error: 'Colors have insufficient contrast. QR code may not scan properly. Try more contrasting colors.' 
+      return {
+        valid: false,
+        error: 'Colors have insufficient contrast. QR code may not scan properly. Try more contrasting colors.'
       };
     }
 
@@ -337,11 +352,11 @@ class QRCodeGenerator {
       const r = ((rgb >> 16) & 0xff) / 255;
       const g = ((rgb >> 8) & 0xff) / 255;
       const b = (rgb & 0xff) / 255;
-      
-      const [rs, gs, bs] = [r, g, b].map(c => 
+
+      const [rs, gs, bs] = [r, g, b].map(c =>
         c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
       );
-      
+
       return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
     };
 
@@ -349,8 +364,21 @@ class QRCodeGenerator {
     const lum2 = getLuminance(color2);
     const brightest = Math.max(lum1, lum2);
     const darkest = Math.min(lum1, lum2);
-    
+
     return (brightest + 0.05) / (darkest + 0.05);
+  }
+
+  hexToRGB(hex) {
+    // Remove # if present
+    hex = hex.replace('#', '');
+
+    // Parse hex to RGB
+    const rgb = parseInt(hex, 16);
+    return {
+      r: (rgb >> 16) & 0xff,
+      g: (rgb >> 8) & 0xff,
+      b: rgb & 0xff
+    };
   }
 
   generateQRCode() {
@@ -427,7 +455,7 @@ class QRCodeGenerator {
 
   downloadAsPNG() {
     try {
-      const dataUrl = this.currentCanvas.toDataURL('image/png');
+      const dataUrl = this.currentCanvas.toDataURL('image/png', CONFIG.DOWNLOAD.PNG_QUALITY);
       const filename = `${CONFIG.DOWNLOAD.FILENAME_PREFIX}-${Date.now()}.png`;
 
       // Create a temporary link element
@@ -464,14 +492,20 @@ class QRCodeGenerator {
       const ctx = this.currentCanvas.getContext('2d');
       const imageData = ctx.getImageData(0, 0, size, size);
 
-      // Detect module size (QR codes are grids)
-      const moduleSize = this.detectModuleSize(imageData, size);
-
       // Build SVG with optimized paths
       let svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges">
   <rect width="${size}" height="${size}" fill="${lightColor}"/>
   <g fill="${darkColor}">`;
+
+      // Parse dark and light colors to determine threshold
+      const darkRGB = this.hexToRGB(darkColor);
+      const lightRGB = this.hexToRGB(lightColor);
+
+      // Calculate midpoint for better color detection
+      const thresholdR = (darkRGB.r + lightRGB.r) / 2;
+      const thresholdG = (darkRGB.g + lightRGB.g) / 2;
+      const thresholdB = (darkRGB.b + lightRGB.b) / 2;
 
       // Analyze pixels and create rectangles for dark areas
       const pixelSize = 1;
@@ -482,8 +516,10 @@ class QRCodeGenerator {
           const g = imageData.data[index + 1];
           const b = imageData.data[index + 2];
 
-          // Check if pixel is dark (close to dark color)
-          const isDark = r < 128 && g < 128 && b < 128;
+          // Check if pixel is closer to dark color than light color
+          const distToDark = Math.abs(r - darkRGB.r) + Math.abs(g - darkRGB.g) + Math.abs(b - darkRGB.b);
+          const distToLight = Math.abs(r - lightRGB.r) + Math.abs(g - lightRGB.g) + Math.abs(b - lightRGB.b);
+          const isDark = distToDark < distToLight;
 
           if (isDark) {
             svg += `    <rect x="${x}" y="${y}" width="${pixelSize}" height="${pixelSize}"/>
@@ -551,7 +587,7 @@ class QRCodeGenerator {
     const btn = this.generateBtn;
     const content = btn.querySelector('.btn-content');
     const loader = btn.querySelector('.btn-loader');
-    
+
     if (isLoading) {
       content.style.display = 'none';
       loader.style.display = 'flex';
@@ -569,11 +605,11 @@ class QRCodeGenerator {
     // Detect QR code module size by finding transitions in first row
     let transitions = [];
     let lastPixel = null;
-    
+
     for (let x = 0; x < Math.min(size, 200); x++) {
       const index = x * 4;
       const pixel = imageData.data[index] < 128 ? 'dark' : 'light';
-      
+
       if (lastPixel && pixel !== lastPixel) {
         transitions.push(x);
       }
@@ -589,7 +625,7 @@ class QRCodeGenerator {
       const avgDistance = distances.reduce((a, b) => a + b, 0) / distances.length;
       return Math.max(1, Math.round(avgDistance));
     }
-    
+
     // Fallback: assume standard QR code size
     return Math.max(1, Math.floor(size / 33)); // Most QR codes are ~21-33 modules
   }
@@ -602,7 +638,7 @@ class QRCodeGenerator {
 
     try {
       // Convert canvas to blob
-      const blob = await new Promise(resolve => 
+      const blob = await new Promise(resolve =>
         this.currentCanvas.toBlob(resolve, 'image/png')
       );
 
@@ -631,7 +667,7 @@ class QRCodeGenerator {
     }
 
     try {
-      const blob = await new Promise(resolve => 
+      const blob = await new Promise(resolve =>
         this.currentCanvas.toBlob(resolve, 'image/png')
       );
 
