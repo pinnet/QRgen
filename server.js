@@ -120,10 +120,10 @@ app.post('/api/shorten', async (req, res) => {
   
   res.json({
     success: true,
-    shortCode: result.data.short_code,
-    shortUrl: `${req.protocol}://${req.get('host')}/${result.data.short_code}`,
-    originalUrl: result.data.original_url,
-    createdAt: result.data.created_at
+    short_code: result.data.short_code,
+    short_url: `${req.protocol}://${req.get('host')}/${result.data.short_code}`,
+    original_url: result.data.original_url,
+    created_at: result.data.created_at
   });
 });
 
