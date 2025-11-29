@@ -70,16 +70,25 @@ app.use(express.static(path.join(__dirname, staticDir), {
 
 // Serve URL shortening page
 app.get('/shorten', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, staticDir, 'shorten.html'));
 });
 
 // Serve login page
 app.get('/login', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, staticDir, 'login.html'));
 });
 
 // Serve stats home page
 app.get('/stats', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, staticDir, 'stats.html'));
 });
 
