@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: qrgen-postgres-local
+    environment:
+      - POSTGRES_DB=qrgen
+      - POSTGRES_USER=qrgen_user
+      - POSTGRES_PASSWORD=qrgen_secure_password_change_me
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - qrgen_local
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qrgen_user -d qrgen"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  qrgen:
+    build: .
+    container_name: qrgen-local
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - DATABASE_URL=postgresql://qrgen_user:qrgen_secure_password_change_me@postgres:5432/qrgen
+    restart: unless-stopped
+    networks:
+      - qrgen_local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "com.qrgen.description=QR Code Generator Web Application - Local Testing"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:8080/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  postgres_data_local:
+    driver: local
+
+networks:
+  qrgen_local:
+    driver: bridge
