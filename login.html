@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Login to JmpLnk for advanced analytics and link management.">
+  <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
   <title>Login - JmpLnk</title>
   
   <!-- Favicon -->
@@ -12,6 +13,9 @@
   <!-- Styles -->
   <link rel="stylesheet" href="index.css">
   <link rel="stylesheet" href="login.css">
+  
+  <!-- Google OAuth -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <!-- Decorative particles -->
@@ -23,10 +27,10 @@
     <div class="login-card">
       <div class="login-header">
         <h1 class="login-title">🔐 Login to JmpLnk</h1>
-        <p class="login-subtitle">Access advanced analytics and link management <span class="coming-soon-badge">COMING SOON</span></p>
+        <p class="login-subtitle">Access advanced analytics and link management</p>
       </div>
 
-      <form id="login-form" style="opacity: 0.5; pointer-events: none;">
+      <form id="login-form">
         <div class="form-group">
           <label class="form-label" for="email">Email Address</label>
           <input 
@@ -34,7 +38,7 @@
             id="email" 
             class="form-input" 
             placeholder="your@email.com"
-            disabled
+            required
           >
         </div>
 
@@ -45,18 +49,19 @@
             id="password" 
             class="form-input" 
             placeholder="••••••••"
-            disabled
+            required
           >
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full" disabled>
+        <button type="submit" class="btn btn-primary btn-full" id="login-btn">
           Login
         </button>
       </form>
 
       <div class="divider">OR</div>
 
-      <button class="btn btn-secondary btn-full" disabled style="opacity: 0.5;">
+      <div id="google-signin-button"></div>
+      <button class="btn btn-secondary btn-full" id="google-oauth-btn">
         <svg style="width: 20px; height: 20px; margin-right: 0.5rem;" viewBox="0 0 24 24">
           <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
         </svg>
@@ -64,10 +69,10 @@
       </button>
 
       <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(136, 69, 255, 0.1); border-radius: 12px; border: 1px solid rgba(136, 69, 255, 0.2);">
-        <h3 style="margin-top: 0; color: var(--text-primary); font-size: 1.1rem;">Coming Soon Features:</h3>
+        <h3 style="margin-top: 0; color: var(--text-primary); font-size: 1.1rem;">PRO Features:</h3>
         <ul class="feature-list">
           <li>Detailed click analytics and visitor insights</li>
-          <li>Custom branded domains</li>
+          <li>Custom short codes for branded links</li>
           <li>Link expiration and password protection</li>
           <li>Bulk link creation and management</li>
           <li>API access for developers</li>
@@ -82,34 +87,191 @@
   </div>
 
   <script>
-    // Show notification that login is coming soon
-    setTimeout(() => {
+    // Check for existing token
+    const token = localStorage.getItem('jmplnk_token');
+    if (token) {
+      const redirect = new URLSearchParams(window.location.search).get('redirect') || '/dashboard';
+      window.location.href = redirect;
+    }
+
+    // Show messages
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    const error = urlParams.get('error');
+    
+    if (message === 'logged_out') {
+      showNotification('You have been logged out successfully', 'info');
+    } else if (error === 'session_expired') {
+      showNotification('Your session has expired. Please login again.', 'error');
+    }
+
+    // Email/Password login
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('login-btn');
+
+      if (!email || !password) {
+        showNotification('Please enter email and password', 'error');
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        // Store JWT token
+        localStorage.setItem('jmplnk_token', data.token);
+        
+        // Redirect to dashboard or original page
+        const redirect = urlParams.get('redirect') || '/dashboard';
+        showNotification('Login successful! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = redirect;
+        }, 1000);
+
+      } catch (error) {
+        showNotification(error.message, 'error');
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+      }
+    });
+
+    // Google OAuth initialization
+    function initGoogleSignIn() {
+      if (typeof google !== 'undefined') {
+        google.accounts.id.initialize({
+          client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+          callback: handleGoogleCallback
+        });
+
+        google.accounts.id.renderButton(
+          document.getElementById('google-signin-button'),
+          {
+            theme: 'filled_black',
+            size: 'large',
+            width: '100%',
+            text: 'continue_with'
+          }
+        );
+      }
+    }
+
+    // Google OAuth callback
+    async function handleGoogleCallback(response) {
+      try {
+        const serverResponse = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            credential: response.credential
+          })
+        });
+
+        const data = await serverResponse.json();
+
+        if (!serverResponse.ok) {
+          throw new Error(data.error || 'Google authentication failed');
+        }
+
+        // Store JWT token
+        localStorage.setItem('jmplnk_token', data.token);
+        
+        // Redirect to dashboard
+        const redirect = urlParams.get('redirect') || '/dashboard';
+        showNotification('Login successful! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = redirect;
+        }, 1000);
+
+      } catch (error) {
+        showNotification(error.message, 'error');
+      }
+    }
+
+    // Fallback Google OAuth button
+    document.getElementById('google-oauth-btn').addEventListener('click', () => {
+      if (typeof google !== 'undefined') {
+        google.accounts.id.prompt();
+      } else {
+        showNotification('Google Sign-In is not available. Please try email/password login.', 'error');
+      }
+    });
+
+    // Notification function
+    function showNotification(message, type = 'info') {
+      const colors = {
+        success: 'rgba(34, 197, 94, 0.95)',
+        error: 'rgba(239, 68, 68, 0.95)',
+        info: 'rgba(136, 69, 255, 0.95)'
+      };
+
       const notification = document.createElement('div');
       notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: rgba(136, 69, 255, 0.95);
+        background: ${colors[type]};
         color: white;
         padding: 1rem 1.5rem;
         border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(136, 69, 255, 0.3);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         z-index: 1000;
         animation: slideIn 0.3s ease;
-        max-width: 300px;
+        max-width: 350px;
       `;
-      notification.innerHTML = `
-        <strong>🚧 Under Development</strong><br>
-        <span style="font-size: 0.9rem;">User authentication and analytics dashboard coming soon!</span>
-      `;
+      notification.textContent = message;
       document.body.appendChild(notification);
 
       setTimeout(() => {
         notification.style.opacity = '0';
         notification.style.transition = 'opacity 0.3s ease';
         setTimeout(() => notification.remove(), 300);
-      }, 5000);
-    }, 500);
+      }, 3000);
+    }
+
+    // Initialize Google Sign-In when loaded
+    window.addEventListener('load', () => {
+      initGoogleSignIn();
+    });
   </script>
+
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    #google-signin-button {
+      margin-bottom: 1rem;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+  </style>
 </body>
 </html>

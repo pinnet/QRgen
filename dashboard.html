@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manage your shortened URLs and view analytics.">
+  <title>Dashboard - JmpLnk</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/icons/icon-192x192.png" type="image/png">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <!-- Decorative particles -->
+  <div class="particle" style="width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s;"></div>
+  <div class="particle" style="width: 60px; height: 60px; top: 70%; left: 80%; animation-delay: 5s;"></div>
+  <div class="particle" style="width: 80px; height: 80px; top: 40%; left: 5%; animation-delay: 10s;"></div>
+  
+  <div class="dashboard-container">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <div class="logo">
+          <h1>🎯 JmpLnk</h1>
+        </div>
+        <div class="header-actions">
+          <span class="user-email" id="user-email"></span>
+          <button class="btn btn-secondary" id="logout-btn">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <!-- Welcome Section -->
+      <section class="welcome-section">
+        <h2 class="welcome-title">Welcome back, <span id="user-name">User</span>! 👋</h2>
+        <p class="welcome-subtitle">Manage your shortened URLs and track analytics</p>
+      </section>
+
+      <!-- Stats Overview -->
+      <section class="stats-overview">
+        <div class="stat-card">
+          <div class="stat-icon">🔗</div>
+          <div class="stat-content">
+            <div class="stat-value" id="total-links">0</div>
+            <div class="stat-label">Total Links</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👁️</div>
+          <div class="stat-content">
+            <div class="stat-value" id="total-visits">0</div>
+            <div class="stat-label">Total Visits</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-content">
+            <div class="stat-value" id="active-links">0</div>
+            <div class="stat-label">Active Links</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-content">
+            <div class="stat-value" id="avg-clicks">0</div>
+            <div class="stat-label">Avg. Clicks/Link</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="action-cards">
+          <a href="/shorten" class="action-card">
+            <div class="action-icon">✨</div>
+            <div class="action-title">Create Short Link</div>
+            <div class="action-desc">Generate a new shortened URL</div>
+          </a>
+          <a href="/stats" class="action-card">
+            <div class="action-icon">📊</div>
+            <div class="action-title">View Analytics</div>
+            <div class="action-desc">Check your link statistics</div>
+          </a>
+          <a href="/" class="action-card">
+            <div class="action-icon">🎨</div>
+            <div class="action-title">Create QR Code</div>
+            <div class="action-desc">Generate custom QR codes</div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Recent Links -->
+      <section class="recent-links">
+        <div class="section-header">
+          <h3>Recent Links</h3>
+          <button class="btn btn-secondary btn-sm" id="refresh-links">🔄 Refresh</button>
+        </div>
+        <div class="links-table-container">
+          <table class="links-table" id="links-table">
+            <thead>
+              <tr>
+                <th>Short Code</th>
+                <th>Original URL</th>
+                <th>Created</th>
+                <th>Visits</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="links-tbody">
+              <tr class="loading-row">
+                <td colspan="5" style="text-align: center; padding: 2rem;">
+                  <div class="loader"></div>
+                  <p style="margin-top: 1rem; color: var(--text-secondary);">Loading your links...</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Account Info -->
+      <section class="account-section">
+        <h3>Account Information</h3>
+        <div class="account-card">
+          <div class="account-row">
+            <span class="account-label">Email:</span>
+            <span class="account-value" id="account-email"></span>
+          </div>
+          <div class="account-row">
+            <span class="account-label">Account Type:</span>
+            <span class="account-value">
+              <span class="badge badge-pro" id="account-type">PRO</span>
+            </span>
+          </div>
+          <div class="account-row">
+            <span class="account-label">Member Since:</span>
+            <span class="account-value" id="member-since"></span>
+          </div>
+          <div class="account-row">
+            <span class="account-label">API Access:</span>
+            <span class="account-value">
+              <code class="api-token" id="api-token">Loading...</code>
+              <button class="btn btn-sm btn-secondary" id="copy-token-btn">📋 Copy</button>
+            </span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Check authentication
+    const token = localStorage.getItem('jmplnk_token');
+    if (!token) {
+      window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+    }
+
+    // Parse JWT payload
+    function parseJWT(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Verify token and load user data
+    async function initDashboard() {
+      try {
+        const payload = parseJWT(token);
+        if (!payload) {
+          throw new Error('Invalid token');
+        }
+
+        // Check if token is expired
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+          throw new Error('Token expired');
+        }
+
+        // Set user info
+        document.getElementById('user-name').textContent = payload.name || payload.email.split('@')[0];
+        document.getElementById('user-email').textContent = payload.email;
+        document.getElementById('account-email').textContent = payload.email;
+        document.getElementById('account-type').textContent = payload.plan || 'PRO';
+        document.getElementById('member-since').textContent = new Date(payload.iat * 1000).toLocaleDateString();
+        document.getElementById('api-token').textContent = token.substring(0, 40) + '...';
+
+        // Load user stats and links
+        await loadUserStats();
+        await loadUserLinks();
+      } catch (error) {
+        console.error('Authentication error:', error);
+        localStorage.removeItem('jmplnk_token');
+        window.location.href = '/login?error=session_expired';
+      }
+    }
+
+    // Load user statistics
+    async function loadUserStats() {
+      try {
+        const response = await fetch('/api/user/stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to load stats');
+
+        const stats = await response.json();
+        document.getElementById('total-links').textContent = stats.totalLinks || 0;
+        document.getElementById('total-visits').textContent = stats.totalVisits || 0;
+        document.getElementById('active-links').textContent = stats.activeLinks || 0;
+        document.getElementById('avg-clicks').textContent = stats.avgClicks || 0;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    // Load user links
+    async function loadUserLinks() {
+      try {
+        const response = await fetch('/api/user/links', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to load links');
+
+        const links = await response.json();
+        displayLinks(links);
+      } catch (error) {
+        console.error('Error loading links:', error);
+        document.getElementById('links-tbody').innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+              Failed to load links. Please try again.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Display links in table
+    function displayLinks(links) {
+      const tbody = document.getElementById('links-tbody');
+      
+      if (!links || links.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem;">
+              <p style="color: var(--text-secondary);">No links yet. <a href="/shorten" style="color: var(--primary);">Create your first one!</a></p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = links.map(link => `
+        <tr>
+          <td>
+            <code class="short-code">${link.short_code}</code>
+          </td>
+          <td>
+            <a href="${link.original_url}" target="_blank" class="original-url" title="${link.original_url}">
+              ${link.original_url.length > 50 ? link.original_url.substring(0, 50) + '...' : link.original_url}
+            </a>
+          </td>
+          <td>${new Date(link.created_at).toLocaleDateString()}</td>
+          <td><span class="visits-badge">${link.visit_count || 0}</span></td>
+          <td>
+            <div class="action-buttons-inline">
+              <button class="btn-icon" onclick="copyLink('${link.short_code}')" title="Copy Link">📋</button>
+              <button class="btn-icon" onclick="viewStats('${link.short_code}')" title="View Stats">📊</button>
+              <button class="btn-icon" onclick="createQR('${link.short_code}')" title="Create QR">🎨</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Action functions
+    function copyLink(shortCode) {
+      const url = `${window.location.origin}/${shortCode}`;
+      navigator.clipboard.writeText(url).then(() => {
+        showNotification('Link copied to clipboard!');
+      });
+    }
+
+    function viewStats(shortCode) {
+      window.location.href = `/stats?code=${shortCode}`;
+    }
+
+    function createQR(shortCode) {
+      const url = `${window.location.origin}/${shortCode}`;
+      window.location.href = `/?url=${encodeURIComponent(url)}`;
+    }
+
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(136, 69, 255, 0.95);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(136, 69, 255, 0.3);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Event listeners
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('jmplnk_token');
+      window.location.href = '/login?message=logged_out';
+    });
+
+    document.getElementById('refresh-links').addEventListener('click', loadUserLinks);
+
+    document.getElementById('copy-token-btn').addEventListener('click', () => {
+      navigator.clipboard.writeText(token).then(() => {
+        showNotification('API token copied to clipboard!');
+      });
+    });
+
+    // Initialize dashboard
+    initDashboard();
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    .loader {
+      border: 3px solid rgba(136, 69, 255, 0.2);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</body>
+</html>

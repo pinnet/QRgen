@@ -3,6 +3,7 @@ const path = require('path');
 const compression = require('compression');
 const helmet = require('helmet');
 const db = require('./db');
+const auth = require('./auth');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -90,6 +91,138 @@ app.get('/stats', (req, res) => {
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, staticDir, 'stats.html'));
+});
+
+// Serve dashboard (protected)
+app.get('/dashboard', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(path.join(__dirname, staticDir, 'dashboard.html'));
+});
+
+// === AUTHENTICATION ROUTES ===
+
+// Login with email/password
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+
+    const result = auth.authenticateUser(email, password);
+
+    if (!result.success) {
+      return res.status(401).json({ error: result.error });
+    }
+
+    res.json({
+      token: result.token,
+      user: result.user
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Register new user
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { email, password, name } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+
+    const result = auth.createUser(email, password, name);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    // Auto-login after registration
+    const token = auth.createToken({
+      id: result.user.id,
+      email: result.user.email,
+      name: result.user.name,
+      plan: result.user.plan
+    });
+
+    res.json({
+      token,
+      user: result.user
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Google OAuth login
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ error: 'Google credential required' });
+    }
+
+    const result = await auth.authenticateWithGoogle(credential);
+
+    if (!result.success) {
+      return res.status(401).json({ error: result.error });
+    }
+
+    res.json({
+      token: result.token,
+      user: result.user
+    });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// === USER API ROUTES (Protected) ===
+
+// Get user stats
+app.get('/api/user/stats', auth.authMiddleware, async (req, res) => {
+  try {
+    // In a real app, fetch user-specific stats from database
+    // For now, return mock data
+    const stats = {
+      totalLinks: 12,
+      totalVisits: 3456,
+      activeLinks: 10,
+      avgClicks: 288
+    };
+
+    res.json(stats);
+  } catch (error) {
+    console.error('Stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
+// Get user links
+app.get('/api/user/links', auth.authMiddleware, async (req, res) => {
+  try {
+    // In a real app, fetch user-specific links from database
+    // For now, fetch popular links as example
+    const result = await db.getPopularUrls(10);
+    
+    if (!result.success) {
+      return res.json([]);
+    }
+
+    res.json(result.data || []);
+  } catch (error) {
+    console.error('Links error:', error);
+    res.status(500).json({ error: 'Failed to fetch links' });
+  }
 });
 
 // API endpoint for stats (keep existing for backward compatibility)

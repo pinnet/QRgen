@@ -23,6 +23,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
 COPY server.js ./
 COPY db.js ./
+COPY auth.js ./
 COPY init-db.sql ./
 COPY test-url-shortening.js ./
 
@@ -32,10 +33,12 @@ COPY index.html ./public/
 COPY shorten.html ./public/
 COPY login.html ./public/
 COPY stats.html ./public/
+COPY dashboard.html ./public/
 COPY index.css ./public/
 COPY shorten.css ./public/
 COPY login.css ./public/
 COPY stats.css ./public/
+COPY dashboard.css ./public/
 COPY app.js ./public/
 COPY qrcode.min.js ./public/
 COPY manifest.json ./public/
