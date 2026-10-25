@@ -4,7 +4,6 @@ deploy.tar
 
 # Node modules
 node_modules/
-package-lock.json
 
 # IDE
 .vscode/
@@ -21,10 +20,21 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# Environment variables
-.env
-.env.local
 
 # Temporary files
 *.tmp
 *.temp
+
+# Database files on the server
+data/
+
+# Secrets: never commit keys, certificates or env files
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.csr
+*.p12
+*.pfx
