@@ -14,3 +14,7 @@ npm-debug.log
 README.md
 .DS_Store
 *.md
+data/
+.env
+.env.*
+test-url-shortening.js

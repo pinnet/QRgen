@@ -2,7 +2,7 @@ const { Pool } = require('pg');
 
 // PostgreSQL connection pool
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://qrgen_user:qrgen_secure_password_change_me@localhost:5432/qrgen',
+  connectionString: process.env.DATABASE_URL,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -95,30 +95,17 @@ const db = {
     }
   },
 
-  // Record a visit with referrer tracking
+  // Record a visit. Only the referring site's domain is kept: no IP address,
+  // user agent or full referrer, so nothing here identifies a visitor.
   async recordVisit(shortCode, visitData = {}) {
-    const {
-      referrer = null,
-      userAgent = null,
-      ipAddress = null,
-      countryCode = null,
-      city = null,
-      deviceType = null,
-      browser = null,
-      os = null
-    } = visitData;
-    
-    const referrerDomain = extractDomain(referrer);
+    const referrerDomain = extractDomain(visitData.referrer);
     
     try {
       const result = await pool.query(
-        `INSERT INTO url_visits (
-          short_code, referrer, referrer_domain, user_agent, ip_address,
-          country_code, city, device_type, browser, os
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        RETURNING id, visited_at`,
-        [shortCode, referrer, referrerDomain, userAgent, ipAddress, 
-         countryCode, city, deviceType, browser, os]
+        `INSERT INTO url_visits (short_code, referrer_domain)
+         VALUES ($1, $2)
+         RETURNING id, visited_at`,
+        [shortCode, referrerDomain]
       );
       return { success: true, data: result.rows[0] };
     } catch (error) {
@@ -212,6 +199,65 @@ const db = {
       return { success: true, data: result.rows[0] };
     } catch (error) {
       console.error('Error deactivating short code:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Change where a short code points, and/or turn it back on
+  async updateShortUrl(shortCode, { originalUrl, isActive, expiresAt } = {}) {
+    try {
+      const result = await pool.query(
+        `UPDATE shortened_urls
+         SET original_url = COALESCE($2, original_url),
+             is_active = COALESCE($3, is_active),
+             expires_at = CASE WHEN $4::boolean THEN $5::timestamptz ELSE expires_at END
+         WHERE short_code = $1
+         RETURNING *`,
+        [shortCode, originalUrl ?? null, isActive ?? null, expiresAt !== undefined, expiresAt ?? null]
+      );
+      
+      if (result.rows.length === 0) {
+        return { success: false, error: 'Short code not found' };
+      }
+      
+      return { success: true, data: result.rows[0] };
+    } catch (error) {
+      console.error('Error updating short code:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // List every short code, newest first, with its visit count
+  async listUrls(limit = 100, offset = 0) {
+    try {
+      const result = await pool.query(
+        `SELECT su.short_code, su.original_url, su.created_at, su.expires_at, su.is_active,
+                COUNT(uv.id)::int AS total_visits, MAX(uv.visited_at) AS last_visit
+         FROM shortened_urls su
+         LEFT JOIN url_visits uv ON su.short_code = uv.short_code
+         GROUP BY su.id
+         ORDER BY su.created_at DESC
+         LIMIT $1 OFFSET $2`,
+        [limit, offset]
+      );
+      
+      return { success: true, data: result.rows };
+    } catch (error) {
+      console.error('Error listing URLs:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Delete visit records older than the retention period
+  async purgeOldVisits(retentionDays) {
+    try {
+      const result = await pool.query(
+        `DELETE FROM url_visits WHERE visited_at < CURRENT_TIMESTAMP - make_interval(days => $1)`,
+        [retentionDays]
+      );
+      return { success: true, deletedCount: result.rowCount };
+    } catch (error) {
+      console.error('Error purging old visits:', error);
       return { success: false, error: error.message };
     }
   },
