@@ -4,7 +4,6 @@ deploy.tar
 
 # Node modules
 node_modules/
-package-lock.json
 
 # IDE
 .vscode/
@@ -28,3 +27,6 @@ npm-debug.log*
 # Temporary files
 *.tmp
 *.temp
+
+# Database files on the server
+data/

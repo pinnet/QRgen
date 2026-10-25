@@ -1,19 +1,28 @@
-version: '3.8'
+# JMPLNK.uk, running on the network hub (10.88.0.1) next to dannyarnold.com.
+#
+# Public path:  visitor -> Cloudflare (HTTPS 443) -> can (Nginx Proxy Manager) -> VPN -> here
+# The hub's firewall only lets port 8083 in over the VPN, so NPM on can is the only way in:
+#   jmplnk.uk  ->  http://10.88.0.1:8083
+#
+# Needs a .env file next to this one (copy .env.example). See DEPLOY.md.
+name: jmplnk
+
+x-logging: &logging
+  driver: journald
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: qrgen-postgres
+    container_name: jmplnk-postgres
+    restart: unless-stopped
+    logging: *logging
     environment:
       - POSTGRES_DB=qrgen
       - POSTGRES_USER=qrgen_user
-      - POSTGRES_PASSWORD=qrgen_secure_password_change_me
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env next to docker-compose.yml}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    networks:
-      - nginxpm_default
-    restart: unless-stopped
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U qrgen_user -d qrgen"]
       interval: 10s
@@ -21,36 +30,19 @@ services:
       retries: 5
       start_period: 10s
 
-  qrgen:
+  jmplnk:
     build: .
-    container_name: qrgen
-    ports:
-      - "8080:8080"
-    environment:
-      - NODE_ENV=production
-      - PORT=8080
-      - DATABASE_URL=postgresql://qrgen_user:qrgen_secure_password_change_me@postgres:5432/qrgen
+    container_name: jmplnk
     restart: unless-stopped
-    tty: true
-    stdin_open: true
-    networks:
-      - nginxpm_default
+    logging: *logging
+    ports:
+      - "8083:8080"
+    environment:
+      - DATABASE_URL=postgresql://qrgen_user:${POSTGRES_PASSWORD}@postgres:5432/qrgen
+      - ADMIN_TOKEN=${ADMIN_TOKEN:?Set ADMIN_TOKEN in .env next to docker-compose.yml}
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-https://jmplnk.uk}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-}
+      - VISIT_RETENTION_DAYS=${VISIT_RETENTION_DAYS:-90}
     depends_on:
       postgres:
         condition: service_healthy
-    labels:
-      - "com.qrgen.description=QR Code Generator Web Application"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
-
-volumes:
-  postgres_data:
-    driver: local
-
-networks:
-  nginxpm_default:
-    external: true
